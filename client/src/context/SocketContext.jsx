@@ -25,7 +25,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       const handleRecieveMessage = (message) => {
-        const { selectedChatType, selectedChatData } = useAppStore.getState(); // Access state outside the function
+        const { selectedChatType, selectedChatData } = useAppStore.getState(); 
         if (
           selectedChatType !== undefined &&
           (selectedChatData._id === message.sender._id ||

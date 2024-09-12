@@ -20,11 +20,15 @@ const messageSchema = new mongoose.Schema({
     },
     content: {
         type: String,
-        required: false,
+        required: ()=>{
+            return this.messageType==="text"
+        },
     },
     file: {
-        type: Buffer,
-        required: false,
+        type: String,
+        required: ()=>{
+            return this.messageType==="file"
+        },
     },
     deliveredAt: {
         type: Date,
@@ -36,7 +40,7 @@ const messageSchema = new mongoose.Schema({
     },
     timeStamp:{
         type:Date,
-        default:Date.now()
+        default:Date.now
     }
 });
 

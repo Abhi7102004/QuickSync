@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
         default: false,
     },
     image: {
-        type: Buffer,
+        type: String,
         required:false,
     }
 }, {

@@ -32,7 +32,7 @@ const ProfileInfo = () => {
       console.error(err.message);
     }
   };
-
+  // console.log(userInfo)
   return (
     <div className="absolute bottom-0 h-16 flex items-center justify-between pl-5 pr-4 w-full bg-gray-800 z-50">
       <div className="flex gap-3 items-center justify-center">

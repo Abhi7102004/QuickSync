@@ -39,7 +39,7 @@ const login = async (req, res) => {
       return res.status(404).send("User not found,Please Register");
     }
     const checkPass = await user.comparePassword(password);
-    console.log(checkPass)
+    console.log(checkPass);
     if (!checkPass) {
       return res.status(400).send("Incorrect Password");
     }
@@ -66,6 +66,7 @@ const login = async (req, res) => {
 };
 const userInfo = async (req, res) => {
   try {
+    console.log(req.userId);
     let user = await UserModel.findById(req.userId).select("-password");
     if (!user) {
       return res.status(404).send("User not found");
@@ -76,42 +77,44 @@ const userInfo = async (req, res) => {
   }
 };
 const updateProfile = async (req, res) => {
-  const userId = req.userId;
-  const { firstName, lastName, color } = req.body;
-  if (!firstName || !lastName || color < 0) {
-    return res.status(400).send("First Name,Last name and color is required");
+  try {
+    const userId = req.userId;
+    const { firstName, lastName, color } = req.body;
+    if (!firstName || !lastName || color < 0) {
+      return res.status(400).send("First Name,Last name and color is required");
+    }
+    const userData = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        color,
+        defaultProfile: true,
+      },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({
+      id: userData._id,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      color: userData.color,
+      defaultProfile: userData.defaultProfile,
+    });
+  } catch (err) {
+    console.log(err.message);
   }
-  const userData = await UserModel.findByIdAndUpdate(
-    userId,
-    {
-      firstName,
-      lastName,
-      color,
-      defaultProfile: true,
-    },
-    { new: true, runValidators: true }
-  );
-  res.status(200).json({
-    id: userData._id,
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    color: userData.color,
-    defaultProfile: userData.defaultProfile,
-  });
 };
 const updateProfileImage = async (req, res) => {
   try {
-    if (!req.file) {
+    if (!req.body.imageUrl) {
       return res.status(400).json({ message: "No file provided" });
     }
     const userId = req.userId;
-    const imageBuffer = await sharp(req.file.buffer)
-      .resize({ width: 800 })
-      .toBuffer();
-
+    const { imageUrl } = req.body;
+    // console.log(imageUrl)
     const userData = await UserModel.findByIdAndUpdate(
       userId,
-      { image: imageBuffer },
+      { image: imageUrl },
       { new: true, runValidators: true }
     );
 

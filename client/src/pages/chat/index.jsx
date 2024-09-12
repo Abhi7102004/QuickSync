@@ -4,9 +4,7 @@ import { useEffect } from 'react';
 import ContactContainer from './ContactContainer';
 import ChatContainer from './ChatContainer';
 import EmptyContainer from './EmptyContainer';
-import { useProfileImage } from "@/utils/custom-hooks/useProfileImage";
 const Chat = () => {
-  useProfileImage();
   const { userInfo, setUserInfo,selectedChatType,selectedChatData } = useAppStore();
   const navigate = useNavigate();
   useEffect(() => {

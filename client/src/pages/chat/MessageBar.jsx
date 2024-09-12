@@ -8,7 +8,7 @@ import { RiEmojiStickerLine } from "react-icons/ri";
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
-  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+  const { selectedChatType, selectedChatData, userInfo} = useAppStore();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef(null);
   const socket = useSocket();
@@ -23,7 +23,6 @@ const MessageBar = () => {
         setEmojiPickerOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -31,8 +30,8 @@ const MessageBar = () => {
   }, []);
 
   const handleSendMessage = async () => {
-    // console.log(userInfo)
-    if (selectedChatType === "contact") {
+    const trimmedMessage=message.trim()
+    if (selectedChatType === "contact" && trimmedMessage.length>0) {
       socket.emit("sendMessage", {
         sender: userInfo._id,
         recipient: selectedChatData._id,
@@ -40,9 +39,15 @@ const MessageBar = () => {
         messageType: "text",
         file: undefined,
       });
-      setMessage("");  // Clear the message input after sending
+      setMessage("");  
     }
   };
+
+  const handleKeyPress=(e)=>{
+    if(e.key==='Enter'){
+      handleSendMessage()
+    }
+  }
 
   return (
     <div className="h-[10vh] bg-gray-900 flex justify-center items-center px-4 gap-2">
@@ -53,6 +58,7 @@ const MessageBar = () => {
           placeholder="Enter your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyPress}
         />
         <div className="flex items-center gap-2 flex-shrink-0">
           <button className="focus:border-none text-neutral-500 focus:outline-none focus:text-white duration-300 transition-all">

@@ -10,6 +10,7 @@ const mongooseConnection = require('./config/mongoose-connection');
 const port = process.env.PORT || 3000;
 const authRoute = require('./routes/auth-route');
 const contactRoute = require('./routes/contact-route');
+const messageRoute=require('./routes/message-route')
 
 // CORS configuration
 app.use(cors({
@@ -26,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoute);
 app.use('/api/contacts', contactRoute);
-
+app.use('/api/messages',messageRoute)
 // Start server
 const server = app.listen(port, () => {
     console.log(`Server is running on Port ${port}`);

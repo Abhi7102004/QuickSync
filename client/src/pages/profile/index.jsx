@@ -6,8 +6,8 @@ import {
   colors,
   getColor,
   UPDATE_PROFILE,
-  UPDATE_PROFILE_IMAGE,
   DELETE_PROFILE_IMAGE,
+  UPDATE_PROFILE_IMAGE,
 } from "@/utils/constants";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/api-client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useProfileImage } from "@/utils/custom-hooks/useProfileImage";
+import axios from "axios";
 
 const Profile = () => {
   const { userInfo, setUserInfo } = useAppStore();
@@ -27,41 +27,54 @@ const Profile = () => {
   const [firstName, setFirstName] = useState(userInfo?.firstName || "");
   const [lastName, setLastName] = useState(userInfo?.lastName || "");
   const [color, setColor] = useState(userInfo?.color || 0);
+  const { image, setImage } = useState(userInfo?.color|| "");
 
-  const { image, setImage } = useProfileImage();
+  // Function to upload image to Cloudinary
+  const uploadImageToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
+    try {
+      const response = await axios.post(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        formData
+      );
+      // console.log('File Uploaded',response.data.secure_url)
+      return response.data.secure_url;
+    } catch (err) {
+      console.error("Error uploading image to Cloudinary:", err);
+      toast.error("Image upload failed");
+      return null;
+    }
+  };
+
+  // Update Profile Picture using Cloudinary
   const updateProfilePicture = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append("profile-image", file);
+    // console.log('File input changed');
+    const imageUrl = await uploadImageToCloudinary(file);
+    if (!imageUrl) return;
 
     try {
-      const response = await apiClient.post(UPDATE_PROFILE_IMAGE, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      });
+      // Update the user profile with the new image URL
+      const response = await apiClient.post(
+        UPDATE_PROFILE_IMAGE,
+        { imageUrl },
+        { withCredentials: true }
+      );
+      // console.log(response)
       if (response.status === 200 && response.data.image) {
-        const { type, data } = response.data.image;
-        const base64String = btoa(
-          new Uint8Array(data).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ""
-          )
-        );
-        const base64Image = `data:${type};base64,${base64String}`;
-        setUserInfo({ ...userInfo, image: base64Image });
-        setImage(base64Image);
+        setUserInfo({ ...userInfo, image: imageUrl });
+        setImage(imageUrl);
         toast.success("Image updated successfully");
       }
     } catch (err) {
       toast.error("Failed to update profile picture");
     }
   };
-
+  // console.log(userInfo)
   const deleteProfilePicture = async () => {
     try {
       const response = await apiClient.delete(DELETE_PROFILE_IMAGE, {
@@ -97,6 +110,7 @@ const Profile = () => {
   };
 
   const handleSubmit = async () => {
+    console.log('Handle submit triggered');
     if (validateProfile()) {
       try {
         const response = await apiClient.post(
@@ -142,10 +156,10 @@ const Profile = () => {
             className="relative h-32 w-32 sm:h-40 sm:w-40 lg:h-48 lg:w-48 xl:h-56 xl:w-56 flex items-center justify-center mx-auto border-4 border-indigo-500 rounded-full bg-gray-200"
           >
             <Avatar className="w-full h-full rounded-full overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105">
-              {image ? (
+              {userInfo.image ? (
                 <AvatarImage
                   className="object-cover h-full w-full"
-                  src={image || userInfo.image}
+                  src={userInfo.image}
                   alt="Profile Image"
                 />
               ) : (
@@ -162,7 +176,7 @@ const Profile = () => {
             </Avatar>
             {hovered && (
               <div
-                onClick={image ? deleteProfilePicture : handleFileClick}
+                onClick={userInfo.image ? deleteProfilePicture : handleFileClick}
                 className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 ring-indigo-500"
               >
                 {image ? (

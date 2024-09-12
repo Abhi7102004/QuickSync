@@ -15,7 +15,10 @@ import {
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { getColor } from "@/utils/constants";
 import { Input } from "@/components/ui/input";
-import { AnimationDefaultOption, SEARCH_CONTACT_ROUTE } from "@/utils/constants";
+import {
+  AnimationDefaultOption,
+  SEARCH_CONTACT_ROUTE,
+} from "@/utils/constants";
 import Lottie from "react-lottie";
 import { apiClient } from "@/lib/api-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,16 +27,7 @@ import { useAppStore } from "@/store";
 const NewDm = () => {
   const [openNewContactTable, setOpenNewContactTable] = useState(false);
   const [searchedContacts, setSearchedContacts] = useState([]);
-  const {setSelectedChatType,setSelectedChatData}=useAppStore();
-  const bufferToBase64 = (buffer) => {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-  };
+  const { setSelectedChatType, setSelectedChatData } = useAppStore();
 
   const searchContacts = async (searchTerm) => {
     if (searchTerm.length > 0) {
@@ -44,16 +38,8 @@ const NewDm = () => {
           { withCredentials: true }
         );
         if (response.status === 200 && response.data.contacts) {
-          const contacts = response.data.contacts.map((contact) => {
-            if (contact.image && contact.image.data) {
-              const base64Image = bufferToBase64(contact.image.data);
-              contact.imageUrl = `data:image/jpeg;base64,${base64Image}`;
-            }
-            return contact;
-          });
-          setSearchedContacts(contacts);
+          setSearchedContacts(response.data.contacts);
         }
-        console.log(contacts);
       } catch (e) {
         console.log("Error occurred while searching contacts", e.message);
       }
@@ -62,13 +48,13 @@ const NewDm = () => {
     }
   };
 
-  const selectContact=(contact)=>{
-    console.log("Selected Contact:", contact);
+  const selectContact = (contact) => {
+    // console.log("Selected Contact:", contact);
     setOpenNewContactTable(false);
-    setSelectedChatType('contact');
+    setSelectedChatType("contact");
     setSelectedChatData(contact);
     setSearchedContacts([]);
-  }
+  };
 
   return (
     <TooltipProvider>
@@ -85,10 +71,7 @@ const NewDm = () => {
           </p>
         </TooltipContent>
       </Tooltip>
-      <Dialog
-        open={openNewContactTable}
-        onOpenChange={setOpenNewContactTable}
-      >
+      <Dialog open={openNewContactTable} onOpenChange={setOpenNewContactTable}>
         <DialogContent className="bg-gray-800 border-none text-white max-w-[90%] w-full sm:max-w-sm md:max-w-md lg:max-w-lg h-auto p-4 md:p-6 rounded-[10px] shadow-lg transform transition-all mx-auto my-6">
           <DialogHeader>
             <DialogTitle className="text-lg md:text-xl font-semibold text-center">
@@ -108,14 +91,14 @@ const NewDm = () => {
                     <div
                       key={index}
                       className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded-lg transition"
-                      onClick={()=>selectContact(contact)}
+                      onClick={() => selectContact(contact)}
                     >
                       <div className="relative w-12 h-12">
                         <Avatar className="w-full h-full rounded-full overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105">
-                          {contact.imageUrl ? (
+                          {contact.image ? (
                             <AvatarImage
                               className="object-cover h-full w-full rounded-full"
-                              src={contact.imageUrl}
+                              src={contact.image}
                               alt={`${contact.firstName} ${contact.lastName}`}
                             />
                           ) : (

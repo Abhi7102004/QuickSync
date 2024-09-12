@@ -6,17 +6,16 @@ import { getColor } from '@/utils/constants';
 
 const ChatHeaderContainer = () => {
   const { closeChat, selectedChatData, userInfo } = useAppStore();
-
   return (
     <div className="h-16 bg-gray-900 border-b-2 border-gray-700 flex justify-center items-center px-4">
       <div className="w-full max-w-[95%] flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="relative w-12 h-12">
             <Avatar className="w-full h-full rounded-full overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105">
-              {selectedChatData?.imageUrl ? (
+              {selectedChatData?.image ? (
                 <AvatarImage
                   className="object-cover h-full w-full rounded-full"
-                  src={selectedChatData.imageUrl}
+                  src={selectedChatData.image}
                   alt="Profile Image"
                 />
               ) : (
