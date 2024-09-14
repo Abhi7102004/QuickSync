@@ -1,5 +1,8 @@
 import { useSocket } from "@/context/SocketContext";
+import { apiClient } from "@/lib/api-client";
 import { useAppStore } from "@/store";
+import { UPLOAD_FILES } from "@/utils/constants";
+import axios from "axios";
 import EmojiPicker from "emoji-picker-react";
 import React, { useEffect, useRef, useState } from "react";
 import { GrAttachment } from "react-icons/gr";
@@ -8,11 +11,11 @@ import { RiEmojiStickerLine } from "react-icons/ri";
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
-  const { selectedChatType, selectedChatData, userInfo} = useAppStore();
+  const { selectedChatType, selectedChatData, userInfo,setFileUploadProgress,setIsUploading } = useAppStore();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef(null);
   const socket = useSocket();
-
+  const fileInputRef = useRef();
   const handleAddEmoji = (emoji) => {
     setMessage((prevMessage) => prevMessage + emoji.emoji);
   };
@@ -30,8 +33,13 @@ const MessageBar = () => {
   }, []);
 
   const handleSendMessage = async () => {
-    const trimmedMessage=message.trim()
-    if (selectedChatType === "contact" && trimmedMessage.length>0) {
+    const isMessageOnlyWhitespace = !/\S/.test(message);
+
+    if (isMessageOnlyWhitespace) {
+      return;
+    }
+
+    if (selectedChatType === "contact") {
       socket.emit("sendMessage", {
         sender: userInfo._id,
         recipient: selectedChatData._id,
@@ -39,15 +47,84 @@ const MessageBar = () => {
         messageType: "text",
         file: undefined,
       });
-      setMessage("");  
+      setMessage("");
+    }
+    else if(selectedChatType==='channel'){
+      socket.emit('send-channel-message',{
+        sender:userInfo._id,
+        content:message,
+        messageType:"text",
+        file:undefined,
+        channelId:selectedChatData._id
+      })
+      setMessage("");
     }
   };
 
-  const handleKeyPress=(e)=>{
-    if(e.key==='Enter'){
-      handleSendMessage()
+  const handleAttachmentClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
-  }
+  };
+  const uploadFileToCloudinary = async (file) => {
+    setIsUploading(true);
+    let formData = new FormData();
+    formData.append("file", file);
+    formData.append(
+      "upload_preset",
+      import.meta.env.VITE_CLOUDINARY_FILE_UPLOAD_PRESET
+    );
+
+    try {
+      const response = await axios.post(
+        `https://api.cloudinary.com/v1_1/${
+          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+        }/raw/upload`,
+        formData,{onUploadProgress:(data)=>{
+          setFileUploadProgress(Math.round(100*data.loaded/data.total))
+        } }
+      );
+      return response.data.secure_url;
+    } catch (e) {
+      console.log(e.message, "File Not Found");
+    } finally{
+      setIsUploading(false);
+    }
+  };
+
+  const handleAttachmentChange = async (e) => {
+    const file = e.target.files[0];
+    try {
+      const attachmentUrl = await uploadFileToCloudinary(file);
+      if (attachmentUrl.length > 0) {
+        if (selectedChatType === "contact") {
+          socket.emit("sendMessage", {
+            sender: userInfo._id,
+            recipient: selectedChatData._id,
+            content: undefined,
+            messageType: "file",
+            file: attachmentUrl,
+          });
+        }
+        else if(selectedChatType==='channel'){
+          socket.emit('send-channel-message',{
+            sender:userInfo._id,
+            content:undefined,
+            messageType:"file",
+            file:attachmentUrl,
+            channelId:selectedChatData._id
+          })
+        }
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
 
   return (
     <div className="h-[10vh] bg-gray-900 flex justify-center items-center px-4 gap-2">
@@ -61,9 +138,18 @@ const MessageBar = () => {
           onKeyDown={handleKeyPress}
         />
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button className="focus:border-none text-neutral-500 focus:outline-none focus:text-white duration-300 transition-all">
+          <button
+            onClick={handleAttachmentClick}
+            className="focus:border-none text-neutral-500 focus:outline-none focus:text-white duration-300 transition-all"
+          >
             <GrAttachment className="text-xl" />
           </button>
+          <input
+            ref={fileInputRef}
+            onChange={handleAttachmentChange}
+            className="hidden"
+            type="file"
+          ></input>
           <div className="relative">
             <button
               className="focus:border-none text-neutral-500 focus:outline-none focus:text-white duration-300 transition-all"

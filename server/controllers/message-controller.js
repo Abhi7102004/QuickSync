@@ -22,9 +22,9 @@ module.exports.getMessages = async (req, res) => {
 };
 module.exports.uploadFiles = async (req, res) => {
   try {
-    const { files } = req.body;
-    // const data=await MessageModel.create
+    console.log(req.body.attachmentUrl);
+    return res.status(200).json({name:"hello"})
   } catch (err) {
-    res.status(500).send("Internal Server Problem");
+    return res.status(500).send("Internal Server Problem");
   }
 };

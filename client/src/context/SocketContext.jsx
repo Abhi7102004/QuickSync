@@ -1,7 +1,7 @@
-import { useAppStore } from "@/store";
-import { HOST } from "@/utils/constants";
 import React, { createContext, useContext, useRef, useEffect } from "react";
 import io from "socket.io-client";
+import { useAppStore } from "@/store";
+import { HOST } from "@/utils/constants";
 
 const SocketContext = createContext();
 
@@ -24,21 +24,37 @@ export const SocketProvider = ({ children }) => {
         console.log(`Connected to Socket Server`);
       });
 
-      const handleRecieveMessage = (message) => {
-        const { selectedChatType, selectedChatData } = useAppStore.getState(); 
+      const handleReceiveMessage = (message) => {
+        const { selectedChatType, selectedChatData,addMessage,addMessageInDMList } = useAppStore.getState();
         if (
-          selectedChatType !== undefined &&
+          selectedChatType === "contact" &&
           (selectedChatData._id === message.sender._id ||
             selectedChatData._id === message.recipient._id)
         ) {
           addMessage(message);
         }
+        addMessageInDMList(message)
       };
 
-      socket.current.on("recieveMessage", handleRecieveMessage);
+      const handleReceiveChannelMessage = (message) => {
+        // console.log("Received channel message:", message);
+        const { selectedChatType, selectedChatData,addMessage } = useAppStore.getState();
+        if (
+          selectedChatType === "channel" &&
+          selectedChatData._id === message.channelId
+        ) {
+          addMessage(message);
+        }
+        // addChannelInChannelList(message)
+      };
+
+      socket.current.on("recieveMessage", handleReceiveMessage);
+      socket.current.on("receive-channel-message", handleReceiveChannelMessage);
 
       return () => {
-        // socket.current.off("recieveMessage", handleRecieveMessage);
+        console.log("Disconnecting socket");
+        socket.current.off("recieveMessage", handleReceiveMessage);
+        socket.current.off("receive-channel-message", handleReceiveChannelMessage);
         socket.current.disconnect();
       };
     }

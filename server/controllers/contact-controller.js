@@ -80,6 +80,30 @@ const getContacts = async (req, res) => {
     return res.status(500).send("Internal Server Error");
   }
 };
+const getAllContacts = async (req, res) => {
+  try {
+    let user = req.userId;
+    if (!user) {
+      return res.status(401).send("Unauthorized Access");
+    }
+    const data = await UserModel.find(
+      {
+        _id: { $ne: user },
+      },
+      "firstName lastName _id email"
+    );
+
+    const contacts = data.map((d) => ({
+      label: d.firstName ? `${d.firstName} ${d.lastName}` : d.email,
+      value: d._id,
+    }));
+    res.status(200).json({ contacts });
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    res.status(500).send("Server Error");
+  }
+};
 
 module.exports.SearchContacts = SearchContacts;
 module.exports.getContacts = getContacts;
+module.exports.getAllContacts = getAllContacts;

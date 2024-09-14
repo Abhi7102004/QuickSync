@@ -12,6 +12,12 @@ export const SEARCH_CONTACT_ROUTE = `${CONTACT_ROUTE}/search`;
 export const MESSAGE_ROUTE = "/api/messages";
 export const GET_ALL_MESSAGES_ROUTE = `${MESSAGE_ROUTE}/get-messages`;
 export const GET_ALL_CONTACT_DMLIST = `${CONTACT_ROUTE}/get-ALL-ContactDMList`;
+export const UPLOAD_FILES=`${MESSAGE_ROUTE}/upload-files`
+export const GET_ALL_CONTACT_INFO=`${CONTACT_ROUTE}/get-all-contacts`
+export const CHANNEL_ROUTE='/api/channels'
+export const CREATE_CHANNEL_ROUTE=`${CHANNEL_ROUTE}/create-channel`
+export const GET_USER_CHANNELS_ROUTE=`${CHANNEL_ROUTE}/get-channels`
+export const GET_ALL_CHANNEL_MESSAGES=`${CHANNEL_ROUTE}/get-channel-messages`
 import animationData from "@/assets/lottie-json";
 export const colors = [
   "bg-[#fff] text-[#f59e0b] border-[2px] border-[#f59e0b]", // Bright yellow-orange
