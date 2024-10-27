@@ -11,7 +11,13 @@ import { RiEmojiStickerLine } from "react-icons/ri";
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
-  const { selectedChatType, selectedChatData, userInfo,setFileUploadProgress,setIsUploading } = useAppStore();
+  const {
+    selectedChatType,
+    selectedChatData,
+    userInfo,
+    setFileUploadProgress,
+    setIsUploading,
+  } = useAppStore();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef(null);
   const socket = useSocket();
@@ -48,15 +54,14 @@ const MessageBar = () => {
         file: undefined,
       });
       setMessage("");
-    }
-    else if(selectedChatType==='channel'){
-      socket.emit('send-channel-message',{
-        sender:userInfo._id,
-        content:message,
-        messageType:"text",
-        file:undefined,
-        channelId:selectedChatData._id
-      })
+    } else if (selectedChatType === "channel") {
+      socket.emit("send-channel-message", {
+        sender: userInfo._id,
+        content: message,
+        messageType: "text",
+        file: undefined,
+        channelId: selectedChatData._id,
+      });
       setMessage("");
     }
   };
@@ -80,14 +85,17 @@ const MessageBar = () => {
         `https://api.cloudinary.com/v1_1/${
           import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
         }/raw/upload`,
-        formData,{onUploadProgress:(data)=>{
-          setFileUploadProgress(Math.round(100*data.loaded/data.total))
-        } }
+        formData,
+        {
+          onUploadProgress: (data) => {
+            setFileUploadProgress(Math.round((100 * data.loaded) / data.total));
+          },
+        }
       );
       return response.data.secure_url;
     } catch (e) {
       console.log(e.message, "File Not Found");
-    } finally{
+    } finally {
       setIsUploading(false);
     }
   };
@@ -105,15 +113,14 @@ const MessageBar = () => {
             messageType: "file",
             file: attachmentUrl,
           });
-        }
-        else if(selectedChatType==='channel'){
-          socket.emit('send-channel-message',{
-            sender:userInfo._id,
-            content:undefined,
-            messageType:"file",
-            file:attachmentUrl,
-            channelId:selectedChatData._id
-          })
+        } else if (selectedChatType === "channel") {
+          socket.emit("send-channel-message", {
+            sender: userInfo._id,
+            content: undefined,
+            messageType: "file",
+            file: attachmentUrl,
+            channelId: selectedChatData._id,
+          });
         }
       }
     } catch (err) {
