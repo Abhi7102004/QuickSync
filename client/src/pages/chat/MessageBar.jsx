@@ -46,6 +46,7 @@ const MessageBar = () => {
     }
 
     if (selectedChatType === "contact") {
+      console.log(userInfo)
       socket.emit("sendMessage", {
         sender: userInfo._id,
         recipient: selectedChatData._id,
@@ -134,7 +135,7 @@ const MessageBar = () => {
   };
 
   return (
-    <div className="h-[10vh] bg-gray-900 flex justify-center items-center px-4 gap-2">
+    <div className="h-[10vh] md:mb-0 mb-[60px] bg-gray-900 flex justify-center items-center px-4 gap-2">
       <div className="flex-1 flex bg-gray-950 rounded-xl items-center px-4 py-2 max-w-[90%]">
         <input
           type="text"

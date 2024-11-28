@@ -1,5 +1,4 @@
 const { default: mongoose } = require("mongoose");
-const channelModel = require("../models/channel-model");
 const UserModel = require("../models/user-model");
 const ChannelModel = require("../models/channel-model");
 
@@ -16,7 +15,7 @@ const createChannel = async (req, res) => {
       return res.status(400).send("Invalid User Found");
     }
 
-    const newChannel = await channelModel.create({
+    const newChannel = await ChannelModel.create({
       name,
       members,
       admin: userId,
@@ -31,7 +30,16 @@ const getUserChannels = async (req, res) => {
     const userId = new mongoose.Types.ObjectId(req.userId);
     const channels = await ChannelModel.find({
       $or: [{ admin: userId }, { members: userId }],
-    }).sort({ updatedAt: -1 });
+    })
+      .populate({
+        path: "members",
+        select: "-password",
+      })
+      .populate({
+        path: "admin",
+        select: "-password",
+      })
+      .sort({ updatedAt: -1 });
     return res.status(200).json({ channels });
   } catch (err) {
     return res.status(500).send("Internal Server Error");
@@ -61,4 +69,4 @@ const getChannelMessages = async (req, res) => {
 };
 module.exports.createChannel = createChannel;
 module.exports.getUserChannels = getUserChannels;
-module.exports.getChannelMessages=getChannelMessages;
+module.exports.getChannelMessages = getChannelMessages;

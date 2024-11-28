@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
-
 const verifyToken = (req, res, next) => {
-    const token = req.cookies.jwtToken;
+    const token = req.cookies.ChatAppUser;
     if (!token) {
         return res.status(401).send('Authentication is required');
     }

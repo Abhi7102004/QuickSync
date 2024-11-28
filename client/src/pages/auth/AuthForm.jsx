@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsList, TabsContent, TabsTrigger } from '@radix-ui/react-tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { apiClient } from '@/lib/api-client';
-import { LOGIN_ROUTE, SIGNUP_ROUTE } from '@/utils/constants';
-import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '@/store';
+import React, { useState } from "react";
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@radix-ui/react-tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/api-client";
+import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constants";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store";
 
 const AuthForm = ({
   activeTab,
@@ -18,68 +18,45 @@ const AuthForm = ({
   confirmPassword,
   setConfirmPassword,
 }) => {
-  const [isLogin, setIsLogin] = useState(false);
-  const [isSignup, setIsSignup] = useState(false);
   const navigate = useNavigate();
-  const { setUserInfo } = useAppStore();
+  const { setUserInfo,userInfo } = useAppStore();
 
-  const validateLogin = () => {
-    if (!email || !password) {
-      toast.error('All fields are required');
-      return false;
-    }
-    return true;
-  };
-
-  const validateSignup = () => {
-    if (!email || !password || !confirmPassword) {
-      toast.error('All fields are required');
-      return false;
-    }
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return false;
-    }
-    return true;
-  };
-
-  // useEffect(() => {
-    const handleLogin = async () => {
-      try {
-        const response = await apiClient.post(LOGIN_ROUTE, { email, password }, { withCredentials: true });
-        if (response.data?.user?.id) {
-          setUserInfo(response.data.user);
-          navigate(response.data.user.defaultProfile === false ? '/profile' : '/chat');
-        }
-      } catch (error) {
-        toast.error('Login failed');
+  const handleLogin = async () => {
+    try {
+      const response = await apiClient.post(
+        LOGIN_ROUTE,
+        { email, password },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        console.log(response.data.user)
+        setUserInfo(response?.data?.user);
+        console.log(userInfo)
+        navigate(
+          response.data.user.defaultProfile === false ? "/profile" : "/chat"
+        );
+        toast.success(response.data.message);
       }
-    };
-
-    if (isLogin && validateLogin()) {
-      handleLogin();
-      setIsLogin(false); 
+    } catch (error) {
+      toast.error(error.response.data.message);
     }
-  // }, [isLogin, email, password, navigate, setUserInfo]);
-
-  // useEffect(() => {
-    const handleSignup = async () => {
-      try {
-        const response = await apiClient.post(SIGNUP_ROUTE, { email, password }, { withCredentials: true });
-        if (response.status === 201) {
-          setUserInfo(response.data.user);
-          navigate('/profile');
-        }
-      } catch (error) {
-        toast.error('Signup failed');
+  };
+  const handleSignup = async () => {
+    try {
+      const response = await apiClient.post(
+        SIGNUP_ROUTE,
+        { email, password },
+        { withCredentials: true }
+      );
+      if (response?.data?.success) {
+        setUserInfo(response?.data?.user);
+        navigate("/profile");
+        toast.success(response.data.message);
       }
-    };
-
-    if (isSignup && validateSignup()) {
-      handleSignup();
-      setIsSignup(false); 
+    } catch (error) {
+      toast.error(error.response.data.message);
     }
-  // }, [isSignup, email, password, confirmPassword, navigate, setUserInfo]);
+  };
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -115,7 +92,12 @@ const AuthForm = ({
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:border-purple-500 focus:ring-2 focus:ring-purple-600"
         />
-        <Button onClick={() => setIsLogin(true)} className="rounded-2xl cursor-pointer px-4 py-3">Login</Button>
+        <Button
+          onClick={handleLogin}
+          className="rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white cursor-pointer px-4 py-3 hover:from-purple-600 hover:to-indigo-600 transition-colors duration-300"
+        >
+          Login
+        </Button>
       </TabsContent>
 
       <TabsContent className="flex flex-col w-full gap-5" value="signup">
@@ -143,7 +125,12 @@ const AuthForm = ({
           onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:ring-2 focus:ring-purple-600 focus:border-purple-500"
         />
-        <Button onClick={() => setIsSignup(true)} className="rounded-2xl cursor-pointer px-4 py-3">SignUp</Button>
+        <Button
+          onClick={handleSignup}
+          className="rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white cursor-pointer px-4 py-3 hover:from-purple-600 hover:to-indigo-600 transition-colors duration-300"
+        >
+          SignUp
+        </Button>
       </TabsContent>
     </Tabs>
   );

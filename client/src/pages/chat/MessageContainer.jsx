@@ -337,7 +337,6 @@ const MessageContainer = () => {
       </Box>
     );
   };
-
   
   return (
     <div className="flex-1 overflow-y-auto p-4 px-8 bg-gray-900 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-gray-900">

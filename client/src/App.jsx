@@ -11,7 +11,6 @@ import Error from "./pages/error/Error";
 import { useAppStore } from "./store";
 import { apiClient } from "./lib/api-client";
 import { GET_USER_ROUTE } from "./utils/constants";
-import { SocketProvider } from "./context/SocketContext";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -61,7 +60,7 @@ const AppRouter = createBrowserRouter([
 
 const App = () => {
   const [loading, setLoading] = useState(true);
-  const { userInfo, setUserInfo } = useAppStore();
+  const {setUserInfo } = useAppStore();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -69,8 +68,8 @@ const App = () => {
         const response = await apiClient.get(GET_USER_ROUTE, {
           withCredentials: true,
         });
-        if (response.status === 200 && response.data?._id) {
-          setUserInfo(response.data);
+        if (response.data.success) {
+          setUserInfo(response?.data?.user);
         } else {
           setUserInfo(undefined);
         }

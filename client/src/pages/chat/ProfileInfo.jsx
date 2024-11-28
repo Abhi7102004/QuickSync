@@ -32,9 +32,8 @@ const ProfileInfo = () => {
       console.error(err.message);
     }
   };
-  // console.log(userInfo)
   return (
-    <div className="absolute bottom-0 h-16 flex items-center justify-between pl-5 pr-4 w-full bg-gray-800 z-50">
+    <div className="absolute bottom-0 rounded-xl h-16 flex items-center justify-between pl-5 pr-4 w-full bg-gray-800 z-50">
       <div className="flex gap-3 items-center justify-center">
         <div className="relative w-12 h-12">
           <Avatar className="w-full h-full rounded-full overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105">

@@ -11,7 +11,8 @@ export const useSocket = () => {
 
 export const SocketProvider = ({ children }) => {
   const socket = useRef();
-  const { userInfo, addMessage } = useAppStore();
+  const { userInfo, addMessage, setOnlineUsers, updateUserStatus,addChannelInChannelList,addMessageInDMList } =
+    useAppStore();
 
   useEffect(() => {
     if (userInfo) {
@@ -25,7 +26,11 @@ export const SocketProvider = ({ children }) => {
       });
 
       const handleReceiveMessage = (message) => {
-        const { selectedChatType, selectedChatData,addMessage,addMessageInDMList } = useAppStore.getState();
+        const {
+          selectedChatType,
+          selectedChatData,
+          addMessage,
+        } = useAppStore.getState();
         if (
           selectedChatType === "contact" &&
           (selectedChatData._id === message.sender._id ||
@@ -33,32 +38,51 @@ export const SocketProvider = ({ children }) => {
         ) {
           addMessage(message);
         }
-        addMessageInDMList(message)
+         addMessageInDMList(message)
       };
 
       const handleReceiveChannelMessage = (message) => {
-        // console.log("Received channel message:", message);
-        const { selectedChatType, selectedChatData,addMessage } = useAppStore.getState();
+        const { selectedChatType, selectedChatData, addMessage } =
+          useAppStore.getState();
         if (
           selectedChatType === "channel" &&
           selectedChatData._id === message.channelId
         ) {
           addMessage(message);
         }
-        // addChannelInChannelList(message)
+         addChannelInChannelList(message)
       };
 
-      socket.current.on("recieveMessage", handleReceiveMessage);
-      socket.current.on("receive-channel-message", handleReceiveChannelMessage);
+      // Handle online users list
+      const handleOnlineUsers = (users) => {
+        setOnlineUsers(users);
+      };
 
+      // Handle individual user status update
+      const handleUserStatus = ({ userId, isOnline }) => {
+        updateUserStatus(userId, isOnline);
+      };
+
+      // Set up socket listeners
+      socket.current.on("receiveMessage", handleReceiveMessage);
+      socket.current.on("receive-channel-message", handleReceiveChannelMessage);
+      socket.current.on("get-online-users", handleOnlineUsers);
+      socket.current.on("user-status-update", handleUserStatus);
+
+      // Clean up socket listeners on unmount
       return () => {
         console.log("Disconnecting socket");
-        socket.current.off("recieveMessage", handleReceiveMessage);
-        socket.current.off("receive-channel-message", handleReceiveChannelMessage);
+        socket.current.off("receiveMessage", handleReceiveMessage);
+        socket.current.off(
+          "receive-channel-message",
+          handleReceiveChannelMessage
+        );
+        socket.current.off("get-online-users", handleOnlineUsers);
+        socket.current.off("user-status-update", handleUserStatus);
         socket.current.disconnect();
       };
     }
-  }, [userInfo, addMessage]);
+  }, [userInfo, addMessage, setOnlineUsers, updateUserStatus,addChannelInChannelList,addMessageInDMList]);
 
   return (
     <SocketContext.Provider value={socket.current}>

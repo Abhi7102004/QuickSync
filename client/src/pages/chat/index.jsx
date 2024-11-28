@@ -45,7 +45,7 @@ const Chat = () => {
   );
 
   return (
-    <div className="flex h-screen text-white overflow-hidden">
+    <div className="flex h-screen text-white bg-violet-900 overflow-hidden">
       {isUploading && <Loader progress={fileUploadProgress} text="Sending File" icon={Upload} />}
       {isDownloading && <Loader progress={fileDownloadProgress} text="Downloading File" icon={Download} />}
       <ContactContainer />

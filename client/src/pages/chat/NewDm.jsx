@@ -27,7 +27,11 @@ import { useAppStore } from "@/store";
 const NewDm = () => {
   const [openNewContactTable, setOpenNewContactTable] = useState(false);
   const [searchedContacts, setSearchedContacts] = useState([]);
-  const { setSelectedChatType, setSelectedChatData } = useAppStore();
+  const {
+    setSelectedChatType,
+    setSelectedChatData,
+    onlineUsers
+  } = useAppStore();
 
   const searchContacts = async (searchTerm) => {
     if (searchTerm.length > 0) {
@@ -49,7 +53,6 @@ const NewDm = () => {
   };
 
   const selectContact = (contact) => {
-    // console.log("Selected Contact:", contact);
     setOpenNewContactTable(false);
     setSelectedChatType("contact");
     setSelectedChatData(contact);
@@ -118,8 +121,14 @@ const NewDm = () => {
                         <span className="text-white font-medium">
                           {contact.firstName} {contact.lastName}
                         </span>
-                        <span className="text-gray-400 text-sm">
-                          {contact.email}
+                        <span
+                          className={`text-sm ${
+                            onlineUsers?.has(contact._id)
+                              ? "text-green-400"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {onlineUsers?.has(contact._id) ? "online" : "offline"}
                         </span>
                       </div>
                     </div>

@@ -20,8 +20,9 @@ export const createChatSlice = (set, get) => ({
     set({ selectedChatMessages }),
   setSelectedContacts: (selectedContacts) => set({ selectedContacts }),
   addChannel: (channel) => {
-    const channels = get().channels;
-    set({ channels: [channels, ...channels] });
+    set((state) => ({
+      channels: [channel, ...state.channels],
+    }));
   },
   closeChat: () =>
     set({
@@ -34,9 +35,9 @@ export const createChatSlice = (set, get) => ({
     const selectedChatType = get().selectedChatType;
     const selectedChatMessages = get().selectedChatMessages;
 
-    set({
+    set((state) => ({
       selectedChatMessages: [
-        ...selectedChatMessages,
+        ...state.selectedChatMessages,
         {
           ...message,
           recipient:
@@ -49,7 +50,7 @@ export const createChatSlice = (set, get) => ({
               : message.sender._id,
         },
       ],
-    });
+    }));
   },
   addChannelInChannelList: (message) => {
     const channels = get().channels;
@@ -62,24 +63,34 @@ export const createChatSlice = (set, get) => ({
       channels.unshift(data);
     }
   },
-  // addMessageInDMList: (message) => {
-  //   const userId = get().userInfo.id;
-  //   const fromId =
-  //     message.sender._id === userId
-  //       ? message.recipient._id
-  //       : message.sender._id;
-  //   const fromData =
-  //     message.sender._id === userId ? message.recipient : message.sender;
-  //   const dmContacts = get().directMessagesContacts;
-  //   const data = dmContacts.find((contact) => contact._id === fromId);
-  //   const index = dmContacts.findIndex((contact) => contact._id === fromId);
-  //   console.log({ data, index, dmContacts, userId, message, fromData });
-  //   if (index !== -1 && index !== undefined) {
-  //     dmContacts.splice(index, 1);
-  //     dmContacts.unshift(data);
-  //   } else {
-  //     dmContacts.unshift(fromData);
-  //   }
-  //   set({ directMessagesContacts: dmContacts });
-  // },
+  addMessageInDMList: (message) => {
+    const userId = get().userInfo._id;
+    const fromId =
+      message.sender._id === userId
+        ? message.recipient._id
+        : message.sender._id;
+    const fromData =
+      message.sender._id === userId ? message.recipient : message.sender;
+    const dmContacts = get().selectedContacts;
+    const data = dmContacts.find((contact) => contact._id === fromId);
+    const index = dmContacts.findIndex((contact) => contact._id === fromId);
+    if (index !== -1 && index !== undefined) {
+      dmContacts.splice(index, 1);
+      dmContacts.unshift(data);
+    } else {
+      dmContacts.unshift(fromData);
+    }
+    set({ selectedContacts: dmContacts });
+  },
+  onlineUsers: new Set(),
+  setOnlineUsers: (users) => set({ onlineUsers: new Set(users) }),
+  updateUserStatus: (userId, isOnline) => {
+    const onlineUsers = new Set(get().onlineUsers);
+    if (isOnline) {
+      onlineUsers.add(userId);
+    } else {
+      onlineUsers.delete(userId);
+    }
+    set({ onlineUsers });
+  },
 });

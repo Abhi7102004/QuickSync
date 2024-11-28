@@ -13,10 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  CREATE_CHANNEL_ROUTE,
-  GET_ALL_CONTACT_INFO,
-} from "@/utils/constants";
+import { CREATE_CHANNEL_ROUTE, GET_ALL_CONTACT_INFO } from "@/utils/constants";
 import { apiClient } from "@/lib/api-client";
 import { useAppStore } from "@/store";
 import { Button } from "@mui/material";
@@ -27,14 +24,15 @@ const CreateChannel = () => {
   const [allContacts, setAllContacts] = useState([]);
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [channelName, setChannelName] = useState("");
-  const { setSelectedChatType, setSelectedChatData,addChannel } = useAppStore();
+  const { setSelectedChatType, setSelectedChatData, addChannel } =
+    useAppStore();
 
   useEffect(() => {
     const getData = async () => {
       const response = await apiClient.get(GET_ALL_CONTACT_INFO, {
         withCredentials: true,
       });
-      setAllContacts(response.data.contacts);
+      setAllContacts(response?.data?.contacts);
     };
     getData();
   }, [setAllContacts]);
@@ -50,12 +48,11 @@ const CreateChannel = () => {
           },
           { withCredentials: true }
         );
-        // console.log(response.data)
-        if(response.status===200){
-            addChannel(response.data.newChannel)
-            setChannelName('');
-            setSelectedContacts([]);
-            setNewChannelModel(false);
+        if (response.status === 200) {
+          addChannel(response?.data?.newChannel);
+          setChannelName("");
+          setSelectedContacts([]);
+          setNewChannelModel(false);
         }
       }
     } catch (err) {
@@ -100,9 +97,9 @@ const CreateChannel = () => {
               className="rounded-lg bg-[#2c2e3b] border-none py-2 text-white"
               defaultOptions={allContacts}
               value={selectedContacts}
-              onChange={setSelectedContacts} 
+              onChange={setSelectedContacts}
               emptyIndicator={
-                <p className="text-center text-lg  leading-10 text-gray-600">
+                <p className="text-center text-lg leading-10 text-gray-600">
                   No result found
                 </p>
               }

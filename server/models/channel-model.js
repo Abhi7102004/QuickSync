@@ -18,13 +18,11 @@ const channelSchema = mongoose.Schema({
   },
 });
 
-// Pre-save middleware for updating 'updatedAt'
 channelSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-// Pre-findOneAndUpdate middleware to ensure 'updatedAt' is updated
 channelSchema.pre("findOneAndUpdate", function (next) {
   this.set({ updatedAt: Date.now() });
   next();
