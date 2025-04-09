@@ -15,7 +15,7 @@ const channelRoute=require('./routes/channel-route');
 const UserModel = require('./models/user-model');
 
 app.use(cors({
-    origin: "*", 
+    origin: process.env.ORIGIN, 
     credentials: true, 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], 
 }));
